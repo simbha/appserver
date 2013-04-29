@@ -1,0 +1,11 @@
+#!/bin/bash
+
+PIDFILE='twistd.pid'
+
+sudo twistd -y server.py \
+	--pidfile=$PIDFILE \
+	--logfile=logs/twistd.log
+
+if [ "$?" = 0 ] ; then
+	echo "Server started with PID $(sudo cat $PIDFILE)"
+fi

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PIDFILE='twistd.pid'
+
+if [ ! -f $PIDFILE ] ; then
+	echo "No pidfile found at $PIDFILE (the process is probably not running)."
+	exit 1
+fi
+
+sudo kill $(sudo cat twistd.pid)

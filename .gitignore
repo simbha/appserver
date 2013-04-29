@@ -1,0 +1,5 @@
+/logs
+/vhosts
+*.cache
+*.pid
+/conf.ini

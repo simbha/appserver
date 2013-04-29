@@ -1,0 +1,33 @@
+[master]
+# Path to the directory to watch for vhosts.
+base-directory=vhosts
+
+# The port on which the proxy server shall be listening.
+# TODO: Replace this with a list of endpoints.
+port=80
+
+# The path to the logfile for the master process.
+http_logfile=logs/http.log
+
+
+[children]
+# The range of ports to use for the subprocesses.
+port-range=9000-9010
+
+# Boolean flag indicating if the subprocesses have to be spawned
+# with the uid/gid of their containing directory.
+change-permissions=1
+
+# Boolean flag indicating if the subprocesses have to be chrooted 
+# in their root directory.
+chroot=0
+
+# Location of the subprocess specific logfiles, relative to
+# the process rundir. String formatting is used to render this value:
+# {vhost} is set to the vhost name.
+logfile=logs/twistd.log
+
+# Location of the twistd executable to use to run virtual hosts. Relative to
+# the process rundir. String formatting is used to render this value:
+# {vhost} is set to the vhost name.
+twistd=venv/bin/twistd
