@@ -41,7 +41,7 @@ mon.watch(vhosts, [created], mask=monitor.IN_CREATE)
 mon.watch(vhosts, [removed], mask=monitor.IN_DELETE)
 
 ports = [
-    endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port'), interface='127.0.0.1')
+    endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port'))
 ]
 
 logfile = filepath.FilePath(config.get('master', 'http_logfile'))
