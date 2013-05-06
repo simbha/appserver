@@ -1,8 +1,13 @@
 #!/bin/bash
 
 PIDFILE='twistd.pid'
+PROC_UID=$UID
+PROC_GID=$GID
 
 sudo twistd -y server.py \
+	--euid \
+	--uid=$PROC_UID \
+	--gid=$PROC_GID \
 	--pidfile=$PIDFILE \
 	--logfile=logs/twistd.log
 
