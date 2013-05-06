@@ -1,4 +1,5 @@
 import os
+import contextlib
 
 from twisted.python import log, filepath
 from twisted.runner import procmon
@@ -24,12 +25,25 @@ class PortPool(object):
         self.available.add(port)
 
 
-class rootUserID(object):
+def conditionalContext(activate, context_factory, *args, **kwargs):
+    if activate:
+        return context_factory(*args, **kwargs)
+    else:
+        @contextlib.contextmanager
+        def null():
+            yield
+        return null()
+
+
+class RootUserID(object):
+
+    root_uid = 0
+
     def __enter__(self):
         self.old_euid = os.geteuid()
-        if self.old_euid != 0:
+        if self.old_euid != self.root_uid:
             log.msg("Setting EUID = 0")
-            os.seteuid(0)
+            os.seteuid(self.root_uid)
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.old_euid != os.geteuid():
@@ -63,11 +77,11 @@ class TwistdAppDeployer(service.MultiService):
         self.reactor = reactor
         self.applications = {}
 
+    def runAsRoot(self):
+        return conditionalContext(self.setUID, RootUserID)
+
     def stopService(self):
-        if self.setUID:
-            with rootUserID():
-                return service.MultiService.stopService(self)
-        else:
+        with self.runAsRoot():
             return service.MultiService.stopService(self)
 
     def getLogfile(self, path, name):
@@ -75,10 +89,11 @@ class TwistdAppDeployer(service.MultiService):
         logfile = os.path.join(path.path, logfile)
         logfile = filepath.FilePath(logfile)
         if not logfile.parent().exists():
-            logfile.parent().makedirs()
-            if self.setUID:
-                os.chown(logfile.parent().path, path.getUserID(),
-                         path.getGroupID())
+            with self.runAsRoot():
+                logfile.parent().makedirs()
+                if self.setUID:
+                    os.chown(logfile.parent().path, path.getUserID(),
+                             path.getGroupID())
         return logfile
 
     def getTwistd(self, path, name):
@@ -137,10 +152,7 @@ class TwistdAppDeployer(service.MultiService):
     def undeploy(self, path):
         name = path.basename()
         log.msg('Stopping vhost {}'.format(name))
-        if self.setUID:
-            with rootUserID():
-                self.procmon.removeProcess(name)
-        else:
+        with self.runAsRoot():
             self.procmon.removeProcess(name)
         self.ports.release(self.root.hosts[name].port)
         self.root.removeHost(name)
