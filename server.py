@@ -23,25 +23,36 @@ depl = deployer.TwistdAppDeployer(
 )
 mon = monitor.DirectoryMonitor(reactor)
 
-def created(path, mask):
-    depl.deploy(path)
 
-def removed(path, mask):
-    depl.undeploy(path)
+def file_created(path, mask):
+    if path.isfile() and path.basename() == 'app.py':
+        depl.deploy(path.parent())
+
+def file_removed(path, mask):
+    if path.basename() == 'app.py':
+        depl.undeploy(path.parent())
+
+def dir_created(path, mask):
+    mon.watch(path, [file_created], mask=monitor.IN_CREATE)
+    mon.watch(path, [file_removed], mask=monitor.IN_DELETE)
+
+mon.watch(vhosts, [dir_created], mask=monitor.IN_CREATE)
+
 
 @reactor.callWhenRunning
 def initial():
     for child in vhosts.children():
-        depl.deploy(
-            child,
-            chroot=config.getboolean('children', 'chroot')
-        )
-
-mon.watch(vhosts, [created], mask=monitor.IN_CREATE)
-mon.watch(vhosts, [removed], mask=monitor.IN_DELETE)
+        mon.watch(child, [file_created], mask=monitor.IN_CREATE)
+        mon.watch(child, [file_removed], mask=monitor.IN_DELETE)
+        app = child.child('app.py')
+        if app.exists() and app.isfile():
+            depl.deploy(
+                child,
+                chroot=config.getboolean('children', 'chroot')
+            )
 
 ports = [
-    endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port'))
+    endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port'), interface='127.0.0.1')
 ]
 
 logfile = filepath.FilePath(config.get('master', 'http_logfile'))
