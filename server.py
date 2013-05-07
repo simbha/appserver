@@ -52,7 +52,7 @@ def initial():
             )
 
 ports = [
-    endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port'), interface='127.0.0.1')
+    endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port'))
 ]
 
 logfile = filepath.FilePath(config.get('master', 'http_logfile'))
