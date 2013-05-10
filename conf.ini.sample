@@ -6,6 +6,8 @@ base-directory=vhosts
 # TODO: Replace this with a list of endpoints.
 port=80
 
+sslport=443
+
 # The path to the logfile for the master process.
 http_logfile=logs/http.log
 
@@ -31,3 +33,13 @@ logfile=logs/twistd.log
 # the process rundir. String formatting is used to render this value:
 # {vhost} is set to the vhost name.
 twistd=venv/bin/twistd
+
+# Location of the private key to use for this virtual hosts. Relative to
+# the process rundir. String formatting is used to render this value:
+# {vhost} is set to the vhost name.
+privatekey=ssl/cert.key
+
+# Location of the certificate for this virtual hosts. Relative to
+# the process rundir. String formatting is used to render this value:
+# {vhost} is set to the vhost name.
+certificate=ssl/cert.pem
