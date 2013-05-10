@@ -5,12 +5,13 @@ PROC_UID=$UID
 PROC_GID=$GID
 
 sudo twistd -y server.py \
-	--euid \
-	--uid=$PROC_UID \
-	--gid=$PROC_GID \
-	--pidfile=$PIDFILE \
-	--logfile=logs/twistd.log
+    --euid \
+    --uid=$PROC_UID \
+    --gid=$PROC_GID \
+    --pidfile=$PIDFILE \
+    --logfile=logs/twistd.log \
+    $@
 
 if [ "$?" = 0 ] ; then
-	echo "Server started with PID $(sudo cat $PIDFILE)"
+    echo "Server started with PID $(sudo cat $PIDFILE)"
 fi
