@@ -111,7 +111,8 @@ sslContext = SNIContextFactory(depl, config)
 
 ports = [
     endpoints.TCP4ServerEndpoint(reactor, config.getint('master', 'port')),
-    endpoints.SSL4ServerEndpoint(reactor, config.getint('master', 'sslport')),
+    endpoints.SSL4ServerEndpoint(reactor, config.getint('master', 'sslport'),
+                                 sslContext),
 ]
 
 logfile = filepath.FilePath(config.get('master', 'http_logfile'))
